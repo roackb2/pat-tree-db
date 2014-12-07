@@ -1,0 +1,32 @@
+{
+  "name": "pat-tree-db",
+  "version": "0.1.0",
+  "description": "Construct PAT tree for Chinese keyword extraction, and store to any Waterline-compatible database.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roackb2/pat-tree-db.git"
+  },
+  "keywords": [
+    "PAT",
+    "tree",
+    "Waterline",
+    "db",
+    "keyword extraction",
+    "SLP",
+    "CKIP",
+    "text segmentation"
+  ],
+  "author": "Jay Liang <roackb2@gmail.com> (https://www.facebook.com/profile.php?id=1391931108)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/roackb2/pat-tree-db/issues"
+  },
+  "homepage": "https://github.com/roackb2/pat-tree-db",
+  "dependencies": {
+    "waterline": "^0.10.14"
+  }
+}
