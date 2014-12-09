@@ -1,14 +1,14 @@
 var Waterline = require('waterline');
+var BTree = require('./lib/BTree.js');
+var models = require('./lib/models.js');
+var utils = require('./lib/utils');
 
-
-module.exports = PATTree;
-
-function PATTree(adapter, connection) {
-	var owner = this;
-	this.orm = new Waterline();
-	adapter = require(adapter);
+exports.connect = function(connection, callback) {
+	var tree = new PATTree();
+	tree.orm = new Waterline();
+	var adapter = require(connection.adapter);
 	connection.adapter = 'adapter';
-	this.config = {
+	tree.config = {
 		adapters: {
 			adapter: adapter
 		},
@@ -22,76 +22,74 @@ function PATTree(adapter, connection) {
 		}
 	}
 
-	//console.log(this.Header);
-
-	for(var key in this.Definition) {
-		this.orm.loadCollection(this.Definition[key]);
+	for(var key in models) {
+		tree.orm.loadCollection(models[key]);
 	}
 
-	this.orm.initialize(this.config, function(err, models) {
+	tree.orm.initialize(tree.config, function(err, models) {
 		if(err) throw err;
 
-		owner.models = models.collections;
-		owner.models.header.find().then(function(headers) {
+		tree.models = models.collections;
+		tree.connections = models.connections;
+		tree.models.header.find().then(function(headers) {
 			//console.log(headers);
 			if(headers.length > 1) {
 				throw "multiple header";
 			} else if(headers.length == 0) {
 				var data = {}
 				data.maxSistring = 0;
-				data.index = 0;
-				owner.models.header.create(data).exec(function(err, header) {
+				tree.models.header.create(data).exec(function(err, header) {
 					if(err) throw err;
-					owner.header = header;
+					tree.header = header;
 				})
 			} else {
-				owner.header = headers[0];
+				tree.header = headers[0];
 			}
+			console.log("connected to db");
+			callback(tree);
 		}).catch(function(err){
 			throw err;
 		});
 	})
+
+}
+
+function PATTree() {
 }
 
 PATTree.prototype = {
 
-	Definition: {
-		Header: Waterline.Collection.extend({
-			identity: 'header',
-			connection: 'connection',
+	INTERNAL: "internal",
+	EXTERNAL: "external",
 
-			attributes: {
-				maxSistring: 'integer',
-				index: 'integer'
-			}
-		}),	
+	testInsert: function(content) {
+		return this.models.rawdoc.create({content: content});
+	},
 
-		Keyword: Waterline.Collection.extend({
-			identity: 'keyword',
-			connection: 'connection',
+	close: function() {
+		process.exit(1);
+	},
 
-			attributes: {
-				name: 'string'
-			}
-		}),
+	_insert: function(root, node, sistring, index) {
+		var indexes = [];
+		indexes.push(index);
+		if(root.id == node.id && !root.data) {
+			root.data = {
+				type: this.EXTERNAL,
+				sistring, sistring,
+				indexes: indexes
+			};
+			this.models.node.update({id: root.id}, root).exec(function(err, node)) 
+		}
 
-		RawDoc: Waterline.Collection.extend({
-			identity: 'rawdoc',
-			connection: 'connection',
-
-			attributes: {
-				content: 'string'
-			}
-		}),
-
-		SplitDoc: Waterline.Collection.extend({
-			identity: 'splitdoc',
-			connection: 'connection',
-
-			attributes: {
-				sentences: 'array'
-			}
-		})
 	}
+
+
+	_getRoot: function() {
+		return this.models.node.find({parent: 'root'});
+	},
+
+
+
 
 }
