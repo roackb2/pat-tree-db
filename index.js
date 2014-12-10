@@ -144,6 +144,15 @@ PATTree.prototype = {
 		});
 	},
 
+	addAllDocuments: function(docs) {
+		var owner = this;
+		return Promise.reduce(docs, function(total, doc) {
+			return owner.addDocument(doc).then(function() {
+				return total++;
+			})
+		}, 0);
+	},
+
 	_addSentense: function(sentense, sentenseIndex) {
 		var owner = this;
 		var params = [];
