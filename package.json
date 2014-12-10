@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/roackb2/pat-tree-db",
   "dependencies": {
+    "bluebird": "^2.3.11",
     "waterline": "^0.10.14"
   }
 }
